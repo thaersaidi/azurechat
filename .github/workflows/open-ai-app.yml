@@ -1,4 +1,4 @@
-name: Build & deploy Next.js app to Azure Web App
+name: Build & Deploy Next.js App to Azure Web App
 
 on:
   push:
@@ -26,36 +26,23 @@ jobs:
       - name: ⚙️ Build Next.js app
         run: |
           cd ./src
-          npm run build --if-present
+          npm run build
 
-      - name: 📂 Copy standalone into the root
+      - name: 📂 Package Next application
         run: |
-          cp -R ./src/.next/standalone ./site-deploy
-
-      - name: 📂 Copy static into the .next folder
-        run: |
-          cp -R ./src/.next/static ./site-deploy/.next/static
-
-      - name: 📂 Copy Public folder
-        run: |
-          cp -R ./src/public ./site-deploy/public
-
-      - name: 📦 Package Next application
-        run: |
-          cd ./site-deploy
-          zip Nextjs-site.zip ./* .next -qr
+          cd ./src
+          zip -r Nextjs-site.zip ./*
 
       - name: 🔍 Diagnostics
         run: |
           ls ./src
-          ls ./src/.next
           ls ./site-deploy
 
       - name: ⬆️ Publish Next Application artifact
         uses: actions/upload-artifact@v4
         with:
           name: Nextjs-site
-          path: ./site-deploy/Nextjs-site.zip
+          path: ./src/Nextjs-site.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -71,7 +58,7 @@ jobs:
           name: Nextjs-site
 
       - name: Unzip artifact for deployment
-        run: unzip Nextjs-site.zip
+        run: unzip Nextjs-site.zip -d ./site-deploy
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
@@ -79,5 +66,5 @@ jobs:
         with:
           app-name: 'azchatext-webapp-am3s7wpx6u3ds'
           slot-name: 'Production'
-          package: '.'
+          package: './site-deploy'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_42F294CCE44C492090553227CC006044 }}
