@@ -28,9 +28,18 @@ jobs:
           cd ./src
           npm run build
 
-      - name: 📂 Package Next application
+      - name: 📂 Create deploy directory and package application
         run: |
-          cd ./src
+          mkdir ./site-deploy
+          mkdir ./site-deploy/.next
+          cp -R ./src/.next/standalone ./site-deploy/
+          cp -R ./src/.next/static ./site-deploy/.next/static
+          cp -R ./src/public ./site-deploy/public
+          cp ./src/next.config.js ./site-deploy/next.config.js
+
+      - name: 📦 Package Next application
+        run: |
+          cd ./site-deploy
           zip -r Nextjs-site.zip ./*
 
       - name: 🔍 Diagnostics
@@ -42,7 +51,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Nextjs-site
-          path: ./src/Nextjs-site.zip
+          path: ./site-deploy/Nextjs-site.zip
 
   deploy:
     runs-on: ubuntu-latest
