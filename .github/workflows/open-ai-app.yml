@@ -28,14 +28,15 @@ jobs:
           cd ./src
           npm run build
 
-      - name: 📂 Create deploy directory and package application
+      # Ensure the deploy directory exists and copy necessary files for deployment
+      - name: 📂 Prepare site deployment directory
         run: |
-          mkdir ./site-deploy
-          mkdir ./site-deploy/.next
-          cp -R ./src/.next/standalone ./site-deploy/
-          cp -R ./src/.next/static ./site-deploy/.next/static
-          cp -R ./src/public ./site-deploy/public
-          cp ./src/next.config.js ./site-deploy/next.config.js
+          mkdir -p ./site-deploy/.next
+          cp -R ./src/.next/standalone ./site-deploy/.next/
+          cp -R ./src/.next/static ./site-deploy/.next/static/
+          cp -R ./src/public ./site-deploy/public/
+          cp ./src/package.json ./site-deploy/
+          cp ./src/next.config.js ./site-deploy/
 
       - name: 📦 Package Next application
         run: |
@@ -44,7 +45,6 @@ jobs:
 
       - name: 🔍 Diagnostics
         run: |
-          ls ./src
           ls ./site-deploy
 
       - name: ⬆️ Publish Next Application artifact
@@ -67,7 +67,7 @@ jobs:
           name: Nextjs-site
 
       - name: Unzip artifact for deployment
-        run: unzip Nextjs-site.zip -d ./site-deploy
+        run: unzip Nextjs-site.zip -d ./deployed-site
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
@@ -75,5 +75,5 @@ jobs:
         with:
           app-name: 'azchatext-webapp-am3s7wpx6u3ds'
           slot-name: 'Production'
-          package: './site-deploy'
+          package: './deployed-site'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_42F294CCE44C492090553227CC006044 }}
