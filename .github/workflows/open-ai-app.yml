@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build_and_deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -47,20 +47,6 @@ jobs:
         run: |
           ls ./site-deploy
 
-      - name: ⬆️ Publish Next Application artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Nextjs-site
-          path: ./site-deploy/Nextjs-site.zip
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
-    steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
